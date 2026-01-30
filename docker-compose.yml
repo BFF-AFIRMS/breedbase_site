@@ -7,14 +7,18 @@ services:
       PGDATABASE: breedbase
       PGPASSWORD: postgres
       PGUSER: postgres
-    image: breedbase/breedbase:latest
+      MODE: DEVELOPMENT
+    build:
+      context: .
+    image: breedbase/breedbase:dev
     depends_on:
       - bb_db
     container_name: bb_web
     ports:
-      - 8099:8080
+      - 8080:8080
     volumes:
       - webdata:/home/production/volume
+      - ./sgn:/home/production/cxgn/sgn
       - type: bind
         source: sgn_local.conf
         target: /home/production/cxgn/sgn/sgn_local.conf
@@ -29,15 +33,46 @@ services:
         target: /home/production/.bash_history
 
   bb_db:
-    image: postgres:12.7
+    image: postgres:13.0
     shm_size: '2gb'
     container_name: bb_db
     environment:
       POSTGRES_PASSWORD: postgres
 
     volumes:
-      - dbdata:/var/lib/postgresql/data
+      - dbdata:/var/lib/postgresql/datas
 
+  keycloak:
+    container_name: keycloak
+    hostname: keycloak
+    image: quay.io/keycloak/keycloak:26.5.1-0
+    depends_on:
+      - bb_db
+    environment:
+      # Database connection
+      KC_DB:              postgres
+      KC_DB_URL:          jdbc:postgresql://bb_db:5432/postgres
+      KC_DB_USERNAME:     postgres
+      KC_DB_PASSWORD:     postgres
+      # Admin credentials
+      KC_BOOTSTRAP_ADMIN_USERNAME:     admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD:     password
+      # Networking
+      KC_HTTP_ENABLED:                 true
+      KC_HTTP_PORT:                    9080
+      KC_HOSTNAME:                     http://localhost:9080/auth
+      KC_HTTP_RELATIVE_PATH:           /auth
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: true
+      KC_PROXY_HEADERS:                xforwarded
+    command: ['start-dev', '--import-realm']
+    volumes:
+      - ./keycloak/themes:/opt/keycloak/themes
+      - ./keycloak/import:/opt/keycloak/data/import
+    expose:
+      - 9080
+    ports:
+      - "9080:9080"
+  
 volumes:
   webdata:
   dbdata:
