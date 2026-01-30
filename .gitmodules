@@ -1,0 +1,3 @@
+[submodule "sgn"]
+	path = sgn
+	url = https://github.com/bff-afirms/sgn

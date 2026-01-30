@@ -18,7 +18,9 @@ services:
       - 8080:8080
     volumes:
       - webdata:/home/production/volume
-      - ./sgn:/home/production/cxgn/sgn
+      - type: bind
+        source: sgn
+        target: /home/production/cxgn/sgn
       - type: bind
         source: sgn_local.conf
         target: /home/production/cxgn/sgn/sgn_local.conf
@@ -31,6 +33,7 @@ services:
       - type: bind
         source: bash_history
         target: /home/production/.bash_history
+
 
   bb_db:
     image: postgres:13.0
