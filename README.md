@@ -3,9 +3,8 @@
 
 ```bash
 git clone https://github.com/BFF-AFIRMS/breedbase_site
-cd breedbase_site/sgn
+cd breedbase_site
 git checkout topic/login-oidc
-cd ..
 git submodule update --recursive --init --progress
 mv sgn/.git sgn/.git-bak
 docker compose up -d
@@ -17,4 +16,6 @@ Once the web application is live at <http://localhost:8080>, apply patches:
 docker compose exec breedbase bash -c "db/run_all_patches.pl -h bb_db -u postgres -p postgres -d breedbase -e admin -s 150"
 ```
 
-
+- Breedbase: <http://localhost:8080/>
+- Keycloak Admin: <http://localhost:9080/auth/admin/>
+- Keycloak Breedbase Realm: <http://localhost:9080/auth/realms/Breedbase/account>
